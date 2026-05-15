@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Tikflow — Conectar TikTok Ads</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07070f;--bg2:#0d0d1c;--bg3:#121224;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --text:#ededff;--muted:#6e6e99;
+  --pink:#ff2255;--cyan:#00f0c8;--yellow:#ffd234;
+  --grad:linear-gradient(135deg,#ff2255,#ff6b35);
+  --grad2:linear-gradient(135deg,#00f0c8,#006cff);
+}
+html{min-height:100%}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Instrument Sans',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:2rem;overflow-x:hidden;position:relative;
+}
+
+/* BG FX */
+.bg-blob{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(80px)}
+.b1{width:500px;height:500px;background:rgba(255,34,85,.08);top:-100px;left:-100px}
+.b2{width:400px;height:400px;background:rgba(0,240,200,.06);bottom:-100px;right:-100px}
+.grid-lines{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+  background-size:60px 60px}
+
+/* LOGO */
+.logo{position:fixed;top:0;left:0;right:0;height:56px;display:flex;align-items:center;
+  padding:0 2rem;border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);background:rgba(7,7,15,.7);z-index:100}
+.logo-mark{display:flex;align-items:center;gap:.4rem;font-family:'Cabinet Grotesk',sans-serif;font-weight:900;font-size:1.2rem}
+.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--grad)}
+.logo-txt{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-right{margin-left:auto;font-size:.78rem;color:var(--muted)}
+.logo-right a{color:var(--pink);text-decoration:none}
+.logo-right a:hover{text-decoration:underline}
+
+/* MAIN CARD */
+.card{
+  position:relative;z-index:1;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:20px;width:100%;max-width:480px;
+  overflow:hidden;margin-top:2rem;
+  box-shadow:0 32px 64px rgba(0,0,0,.5);
+  animation:cardIn .4s ease both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.card-top{
+  padding:2rem 2rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(255,34,85,.04),transparent);
+}
+.card-eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--pink);margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem}
+.card-eyebrow::before{content:'';width:16px;height:1px;background:var(--pink)}
+.card-title{font-family:'Cabinet Grotesk',sans-serif;font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1.1;margin-bottom:.5rem}
+.card-sub{font-size:.85rem;color:var(--muted);line-height:1.65}
+
+/* ACCOUNT SELECTOR */
+.acc-selector{padding:1.25rem 2rem;border-bottom:1px solid var(--border)}
+.acc-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.6rem}
+.acc-select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:.65rem 1rem;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:.875rem;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236e6e99' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;transition:border-color .2s}
+.acc-select:focus{border-color:rgba(255,34,85,.4)}
+.acc-select option{background:var(--bg3)}
+
+/* OPTIONS */
+.options{padding:1.25rem 2rem;display:flex;flex-direction:column;gap:.75rem}
+
+.opt{
+  border:1px solid var(--border2);border-radius:14px;padding:1.25rem;
+  cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+  background:var(--bg3);
+}
+.opt::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s}
+.opt:hover{border-color:rgba(255,34,85,.35);transform:translateY(-1px)}
+.opt:hover::before{opacity:1}
+.opt.opt-primary::before{background:linear-gradient(135deg,rgba(255,34,85,.06),transparent)}
+.opt.opt-secondary::before{background:linear-gradient(135deg,rgba(0,240,200,.05),transparent)}
+.opt:active{transform:translateY(0)}
+
+.opt-head{display:flex;align-items:flex-start;gap:.85rem}
+.opt-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;position:relative;z-index:1}
+.opt-ico.red{background:rgba(255,34,85,.12);border:1px solid rgba(255,34,85,.2)}
+.opt-ico.teal{background:rgba(0,240,200,.08);border:1px solid rgba(0,240,200,.15)}
+.opt-content{flex:1;position:relative;z-index:1}
+.opt-title{font-family:'Cabinet Grotesk',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:.25rem;display:flex;align-items:center;gap:.5rem}
+.opt-badge{font-size:.62rem;background:rgba(255,34,85,.12);color:#ff7da0;padding:.15rem .5rem;border-radius:50px;font-family:'Instrument Sans',sans-serif;font-weight:400}
+.opt-badge.teal{background:rgba(0,240,200,.1);color:var(--cyan)}
+.opt-desc{font-size:.8rem;color:var(--muted);line-height:1.6}
+.opt-arrow{margin-left:auto;color:var(--muted);font-size:1rem;flex-shrink:0;position:relative;z-index:1;transition:transform .2s,color .2s}
+.opt:hover .opt-arrow{transform:translateX(3px);color:var(--text)}
+
+/* LINK GERADO */
+.link-box{display:none;margin-top:.75rem;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:1rem;position:relative;z-index:1}
+.link-box.show{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.link-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+.link-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.timer-badge{display:flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:500}
+.timer-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:blink 1s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.link-url{font-size:.72rem;color:var(--muted);font-family:monospace;word-break:break-all;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:.5rem .75rem;margin-bottom:.75rem;line-height:1.5;max-height:60px;overflow:hidden;position:relative}
+.link-url::after{content:'';position:absolute;bottom:0;left:0;right:0;height:20px;background:linear-gradient(transparent,var(--bg2))}
+.link-actions{display:flex;gap:.5rem}
+.btn-copy{flex:1;background:var(--grad2);border:none;color:#fff;padding:.55rem;border-radius:8px;font-size:.8rem;font-weight:500;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.btn-copy:hover{opacity:.85}
+.btn-copy.copied{background:rgba(0,240,200,.15);border:1px solid rgba(0,240,200,.3);color:var(--cyan)}
+.btn-open{background:none;border:1px solid var(--border2);color:var(--text);padding:.55rem .85rem;border-radius:8px;font-size:.8rem;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all .2s;white-space:nowrap}
+.btn-open:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* PROGRESS BAR */
+.prog-wrap{padding:0;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;margin:0 2rem}
+.prog-wrap.show{max-height:60px;padding:.5rem 0}
+.prog-bar{height:2px;background:rgba(255,255,255,.06);border-radius:50px;overflow:hidden}
+.prog-fill{height:100%;background:var(--grad);border-radius:50px;width:0;transition:width .4s ease}
+.prog-txt{font-size:.72rem;color:var(--muted);margin-top:.4rem;text-align:center}
+
+/* CONTAS CONECTADAS */
+.connected-section{padding:1.25rem 2rem;border-top:1px solid var(--border)}
+.conn-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between}
+.conn-count{color:var(--cyan);font-weight:500}
+.conn-list{display:flex;flex-direction:column;gap:.5rem;max-height:220px;overflow-y:auto}
+.conn-list::-webkit-scrollbar{width:4px}
+.conn-list::-webkit-scrollbar-track{background:transparent}
+.conn-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:50px}
+.conn-item{display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;background:var(--bg3);border:1px solid var(--border);border-radius:10px;transition:border-color .2s}
+.conn-item:hover{border-color:var(--border2)}
+.conn-avi{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0}
+.conn-info{flex:1;min-width:0}
+.conn-name{font-size:.83rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conn-id{font-size:.7rem;color:var(--muted);font-family:monospace}
+.conn-status{display:flex;align-items:center;gap:.35rem;font-size:.7rem}
+.status-dot{width:5px;height:5px;border-radius:50%}
+.status-dot.on{background:var(--cyan)}
+.status-dot.off{background:var(--muted)}
+.conn-remove{width:24px;height:24px;border-radius:6px;background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.conn-remove:hover{background:rgba(255,34,85,.1);border-color:rgba(255,34,85,.3);color:#ff7da0}
+.conn-empty{text-align:center;padding:1.5rem;font-size:.83rem;color:var(--muted)}
+
+/* FOOTER CARD */
+.card-footer{padding:1rem 2rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.01)}
+.footer-info{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.35rem}
+.footer-info::before{content:'🔒';font-size:.7rem}
+.btn-dashboard{background:var(--grad);border:none;color:#fff;padding:.5rem 1.25rem;border-radius:8px;font-size:.8rem;font-weight:500;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:opacity .2s}
+.btn-dashboard:hover{opacity:.85}
+
+/* TOAST */
+.toasts{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none}
+.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:.65rem 1rem;font-size:.8rem;display:flex;align-items:center;gap:.5rem;animation:tIn .2s ease;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+@keyframes tIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.toast.ok{border-color:rgba(0,240,200,.3)}
+.toast.err{border-color:rgba(255,34,85,.3)}
+.toast.warn{border-color:rgba(255,210,52,.3)}
+</style>
+</head>
+<body>
+
+<div class="bg-blob b1"></div>
+<div class="bg-blob b2"></div>
+<div class="grid-lines"></div>
+
+<!-- LOGO -->
+<div class="logo">
+  <div class="logo-mark">
+    <div class="logo-dot"></div>
+    <span class="logo-txt">Tikflow</span>
+  </div>
+  <div class="logo-right">
+    Já conectou? <a href="dashboard.html">Ir para o painel →</a>
+  </div>
+</div>
+
+<!-- CARD PRINCIPAL -->
+<div class="card">
+
+  <!-- TOPO -->
+  <div class="card-top">
+    <div class="card-eyebrow">TikTok Ads</div>
+    <div class="card-title">Conectar conta TikTok Ads</div>
+    <div class="card-sub">Escolha como deseja conectar sua conta TikTok Ads ao Tikflow.</div>
+  </div>
+
+  <!-- SELETOR DE PERFIL (opcional) -->
+  <div class="acc-selector">
+    <div class="acc-label">Apelido para esta conta (opcional)</div>
+    <input id="acc-nickname" type="text" placeholder="Ex: Loja Fashion, Cliente 01, Conta Principal…"
+      style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:.65rem 1rem;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s"
+      onfocus="this.style.borderColor='rgba(255,34,85,.4)'" onblur="this.style.borderColor='rgba(255,255,255,.13)'"/>
+  </div>
+
+  <!-- OPÇÕES -->
+  <div class="options">
+
+    <!-- OPÇÃO 1: OAUTH DIRETO -->
+    <div class="opt opt-primary" onclick="connectDirect()">
+      <div class="opt-head">
+        <div class="opt-ico red">🌐</div>
+        <div class="opt-content">
+          <div class="opt-title">
+            Continuar neste navegador
+            <span class="opt-badge">Mais rápido</span>
+          </div>
+          <div class="opt-desc">Conecte sua conta TikTok Ads diretamente neste navegador via OAuth oficial.</div>
+        </div>
+        <div class="opt-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- OPÇÃO 2: LINK PARA ADSPOWER -->
+    <div class="opt opt-secondary" onclick="generateLink()">
+      <div class="opt-head">
+        <div class="opt-ico teal">🔗</div>
+        <div class="opt-content">
+          <div class="opt-title">
+            Copiar link para AdsPower
+            <span class="opt-badge teal">Multi-conta</span>
+          </div>
+          <div class="opt-desc">Gere um link para conectar em outro perfil do AdsPower. Ideal para conectar várias contas.</div>
+        </div>
+        <div class="opt-arrow">→</div>
+      </div>
+
+      <!-- BOX DO LINK GERADO -->
+      <div class="link-box" id="link-box">
+        <div class="link-header">
+          <div class="link-label">Link gerado</div>
+          <div class="timer-badge">
+            <div class="timer-dot"></div>
+            <span id="timer-txt" style="color:var(--cyan)">30:00</span>
+          </div>
+        </div>
+        <div class="link-url" id="link-url">Gerando link…</div>
+        <div class="link-actions">
+          <button class="btn-copy" id="btn-copy" onclick="copyLink(event)">
+            📋 Copiar link
+          </button>
+          <button class="btn-open" onclick="openInstructions(event)">
+            Como usar →
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="prog-wrap" id="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-txt" id="prog-txt"></div>
+  </div>
+
+  <!-- CONTAS CONECTADAS -->
+  <div class="connected-section">
+    <div class="conn-label">
+      Contas conectadas
+      <span class="conn-count" id="conn-count">0</span>
+    </div>
+    <div class="conn-list" id="conn-list">
+      <div class="conn-empty" id="conn-empty">Nenhuma conta conectada ainda</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="card-footer">
+    <div class="footer-info">OAuth oficial · Nunca pedimos sua senha</div>
+    <button class="btn-dashboard" onclick="location.href='dashboard.html'">Ir ao painel →</button>
+  </div>
+
+</div>
+
+<!-- MODAL INSTRUÇÕES ADSPOWER -->
+<div id="instructions-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(6px)" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:18px;padding:2rem;max-width:460px;width:90%;animation:cardIn .2s ease">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+      <div style="font-family:'Cabinet Grotesk',sans-serif;font-size:1.1rem;font-weight:800">Como usar no AdsPower</div>
+      <button onclick="document.getElementById('instructions-modal').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:.2rem">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div style="display:flex;gap:.85rem;align-items:flex-start">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;color:#fff">1</div>
+        <div style="font-size:.875rem;line-height:1.65">Clique em <strong>"Copiar link"</strong> no Tikflow</div>
+      </div>
+      <div style="display:flex;gap:.85rem;align-items:flex-start">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;color:#fff">2</div>
+        <div style="font-size:.875rem;line-height:1.65">Abra o <strong>AdsPower</strong> e selecione o perfil com a conta TikTok que deseja conectar</div>
+      </div>
+      <div style="display:flex;gap:.85rem;align-items:flex-start">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;color:#fff">3</div>
+        <div style="font-size:.875rem;line-height:1.65">Clique em <strong>"Abrir navegador"</strong> no perfil desejado</div>
+      </div>
+      <div style="display:flex;gap:.85rem;align-items:flex-start">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;color:#fff">4</div>
+        <div style="font-size:.875rem;line-height:1.65">Cole o link na barra de endereço do navegador do AdsPower e pressione Enter</div>
+      </div>
+      <div style="display:flex;gap:.85rem;align-items:flex-start">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;color:#fff">5</div>
+        <div style="font-size:.875rem;line-height:1.65">Autorize o acesso no TikTok. A conta aparecerá automaticamente no Tikflow ✓</div>
+      </div>
+    </div>
+    <div style="margin-top:1.25rem;background:rgba(255,210,52,.06);border:1px solid rgba(255,210,52,.15);border-radius:8px;padding:.75rem;font-size:.78rem;color:var(--muted)">
+      ⏱ O link expira em <strong style="color:var(--yellow)">30 minutos</strong>. Para conectar outra conta, clique em "Copiar link para AdsPower" novamente.
+    </div>
+    <button onclick="document.getElementById('instructions-modal').style.display='none'" style="width:100%;margin-top:1rem;background:var(--grad);border:none;color:#fff;padding:.75rem;border-radius:10px;font-family:'Instrument Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Entendido!</button>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIGURAÇÃO — troque pelos seus valores do Supabase
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  SUPABASE_URL:  "https://SEU-PROJETO.supabase.co", // ← troque
+  SUPABASE_ANON: "SUA-ANON-KEY",                     // ← troque
+  TIKTOK_APP_ID: "SEU-TIKTOK-APP-ID",                // ← troque
+};
+const API = `${CONFIG.SUPABASE_URL}/functions/v1/tiktok-oauth`;
+
+// ══════════════════════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════════════════════
+let connectedAccounts = JSON.parse(localStorage.getItem('tf_accounts') || '[]');
+let timerInterval = null;
+let generatedLink = null;
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+(function init() {
+  const p = new URLSearchParams(location.search);
+
+  // Retorno do OAuth direto
+  if (p.get('connected') === 'true') {
+    const n       = p.get('accounts') || '1';
+    const accIds  = p.get('advertiser_ids')?.split(',') || [];
+    const nick    = sessionStorage.getItem('tf_pending_nick') || '';
+    sessionStorage.removeItem('tf_pending_nick');
+
+    accIds.forEach((id, i) => addAccount({
+      advertiser_id: id,
+      name: nick || `Conta ${connectedAccounts.length + i + 1}`,
+      source: 'direct',
+    }));
+
+    toast(`✓ ${n} conta(s) conectada(s) com sucesso!`, 'ok');
+    history.replaceState({}, '', location.pathname);
+  }
+
+  // Retorno do OAuth via link (AdsPower)
+  if (p.get('connected_via_link') === 'true') {
+    const accIds = p.get('advertiser_ids')?.split(',') || [];
+    const nick   = p.get('nick') || `Conta ${connectedAccounts.length + 1}`;
+
+    accIds.forEach((id, i) => addAccount({
+      advertiser_id: id,
+      name: nick || `Conta ${connectedAccounts.length + i + 1}`,
+      source: 'adspower',
+    }));
+
+    toast(`✓ Conta conectada via AdsPower!`, 'ok');
+    history.replaceState({}, '', location.pathname);
+  }
+
+  if (p.get('error')) {
+    toast('Erro ao conectar: ' + p.get('error'), 'err');
+    history.replaceState({}, '', location.pathname);
+  }
+
+  renderAccounts();
+})();
+
+// ══════════════════════════════════════════════════════════
+// CONECTAR DIRETO (mesmo navegador)
+// ══════════════════════════════════════════════════════════
+function connectDirect() {
+  const nick = document.getElementById('acc-nickname').value.trim();
+  if (nick) sessionStorage.setItem('tf_pending_nick', nick);
+
+  showProgress('Redirecionando para o TikTok…', 60);
+
+  // Redireciona para o endpoint de login da edge function
+  setTimeout(() => {
+    location.href = `${API}/login?source=direct`;
+  }, 600);
+}
+
+// ══════════════════════════════════════════════════════════
+// GERAR LINK PARA ADSPOWER
+// ══════════════════════════════════════════════════════════
+async function generateLink() {
+  const nick = document.getElementById('acc-nickname').value.trim();
+
+  // Fecha link anterior se estava aberto
+  const box = document.getElementById('link-box');
+  if (box.classList.contains('show') && generatedLink) {
+    // Gera novo link
+  }
+
+  showProgress('Gerando link seguro…', 30);
+
+  try {
+    // Chama a edge function para gerar um token de estado único
+    const res = await fetch(`${API}/generate-link`, {
+      method: 'POST',
+      headers: { 'apikey': CONFIG.SUPABASE_ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nick, expires_in: 1800 }), // 30 min
+    });
+
+    let state;
+    if (res.ok) {
+      const data = await res.json();
+      state = data.state;
+    } else {
+      // Fallback: gera state localmente (funciona sem o endpoint generate-link)
+      state = btoa(JSON.stringify({
+        nick: nick || 'Nova conta',
+        ts:   Date.now(),
+        exp:  Date.now() + 30 * 60 * 1000,
+        r:    Math.random().toString(36).slice(2),
+      }));
+    }
+
+    // Monta a URL de OAuth com o state único
+    const redirectUri = encodeURIComponent(`${API}/callback`);
+    const oauthUrl = `https://business-api.tiktok.com/portal/auth?app_id=${CONFIG.TIKTOK_APP_ID}&redirect_uri=${redirectUri}&state=${encodeURIComponent(state)}&source=adspower`;
+
+    generatedLink = oauthUrl;
+
+    // Mostra o link
+    hideProgress();
+    document.getElementById('link-url').textContent = oauthUrl;
+    box.classList.add('show');
+
+    // Inicia timer de 30 min
+    startTimer(30 * 60);
+
+    toast('Link gerado! Cole no AdsPower.', 'ok');
+
+  } catch (err) {
+    hideProgress();
+    // Mesmo se a API falhar, gera o link com state local
+    const state = btoa(JSON.stringify({
+      nick: nick || 'Nova conta',
+      ts:   Date.now(),
+      exp:  Date.now() + 30 * 60 * 1000,
+    }));
+    const redirectUri = encodeURIComponent(`${API}/callback`);
+    generatedLink = `https://business-api.tiktok.com/portal/auth?app_id=${CONFIG.TIKTOK_APP_ID}&redirect_uri=${redirectUri}&state=${encodeURIComponent(state)}`;
+
+    document.getElementById('link-url').textContent = generatedLink;
+    box.classList.add('show');
+    startTimer(30 * 60);
+    toast('Link gerado localmente.', 'warn');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// COPIAR LINK
+// ══════════════════════════════════════════════════════════
+async function copyLink(e) {
+  e.stopPropagation();
+  if (!generatedLink) return;
+
+  try {
+    await navigator.clipboard.writeText(generatedLink);
+    const btn = document.getElementById('btn-copy');
+    btn.textContent = '✓ Copiado!';
+    btn.classList.add('copied');
+    toast('Link copiado! Cole no AdsPower.', 'ok');
+    setTimeout(() => {
+      btn.innerHTML = '📋 Copiar link';
+      btn.classList.remove('copied');
+    }, 2000);
+  } catch {
+    // Fallback para navegadores sem clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = generatedLink;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('Link copiado!', 'ok');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════════════════
+function startTimer(seconds) {
+  if (timerInterval) clearInterval(timerInterval);
+  let remaining = seconds;
+
+  const update = () => {
+    const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const s = String(remaining % 60).padStart(2, '0');
+    const el = document.getElementById('timer-txt');
+    if (el) {
+      el.textContent = `${m}:${s}`;
+      if (remaining <= 300) el.style.color = 'var(--yellow)'; // últimos 5 min
+      if (remaining <= 60)  el.style.color = '#ff7da0';        // último minuto
+    }
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      document.getElementById('link-box').classList.remove('show');
+      generatedLink = null;
+      toast('Link expirado. Gere um novo.', 'warn');
+    }
+    remaining--;
+  };
+
+  update();
+  timerInterval = setInterval(update, 1000);
+}
+
+// ══════════════════════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════════════════════
+function showProgress(msg, pct) {
+  const wrap = document.getElementById('prog-wrap');
+  const fill = document.getElementById('prog-fill');
+  const txt  = document.getElementById('prog-txt');
+  wrap.classList.add('show');
+  fill.style.width = pct + '%';
+  txt.textContent  = msg;
+}
+function hideProgress() {
+  document.getElementById('prog-wrap').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════════════════
+// CONTAS CONECTADAS
+// ══════════════════════════════════════════════════════════
+const COLORS = [
+  'rgba(255,34,85,.15);color:#ff7da0',
+  'rgba(0,240,200,.1);color:#00f0c8',
+  'rgba(255,210,52,.1);color:#ffd234',
+  'rgba(124,92,252,.15);color:#a991ff',
+  'rgba(0,108,255,.12);color:#5599ff',
+];
+
+function addAccount(acc) {
+  // Evita duplicata
+  if (connectedAccounts.find(a => a.advertiser_id === acc.advertiser_id)) return;
+  acc.connected_at = new Date().toISOString();
+  acc.color = COLORS[connectedAccounts.length % COLORS.length];
+  connectedAccounts.push(acc);
+  localStorage.setItem('tf_accounts', JSON.stringify(connectedAccounts));
+  renderAccounts();
+}
+
+function removeAccount(id) {
+  connectedAccounts = connectedAccounts.filter(a => a.advertiser_id !== id);
+  localStorage.setItem('tf_accounts', JSON.stringify(connectedAccounts));
+  renderAccounts();
+  toast('Conta desconectada', 'warn');
+}
+
+function renderAccounts() {
+  const list  = document.getElementById('conn-list');
+  const empty = document.getElementById('conn-empty');
+  const count = document.getElementById('conn-count');
+
+  count.textContent = connectedAccounts.length;
+
+  if (!connectedAccounts.length) {
+    list.innerHTML = '<div class="conn-empty">Nenhuma conta conectada ainda</div>';
+    return;
+  }
+
+  list.innerHTML = connectedAccounts.map(a => {
+    const initials = (a.name || a.advertiser_id).slice(0, 2).toUpperCase();
+    const [bg, color] = (a.color || COLORS[0]).split(';color:');
+    const srcLabel = a.source === 'adspower' ? '· AdsPower' : '· Direto';
+    return `<div class="conn-item">
+      <div class="conn-avi" style="background:${bg};color:${color}">${initials}</div>
+      <div class="conn-info">
+        <div class="conn-name">${a.name || 'Conta ' + a.advertiser_id}</div>
+        <div class="conn-id">${a.advertiser_id} ${srcLabel}</div>
+      </div>
+      <div class="conn-status">
+        <div class="status-dot on"></div>
+        <span style="color:var(--cyan)">Ativa</span>
+      </div>
+      <button class="conn-remove" onclick="removeAccount('${a.advertiser_id}')" title="Desconectar">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// INSTRUÇÕES
+// ══════════════════════════════════════════════════════════
+function openInstructions(e) {
+  e.stopPropagation();
+  document.getElementById('instructions-modal').style.display = 'flex';
+}
+
+// ══════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════
+function toast(msg, type = 'ok') {
+  const wrap = document.getElementById('toasts');
+  const el   = document.createElement('div');
+  const ico  = type === 'ok' ? '<span style="color:var(--cyan)">✓</span>'
+             : type === 'err' ? '<span style="color:#ff7da0">✕</span>'
+             : '<span style="color:var(--yellow)">⚠</span>';
+  el.className = `toast ${type}`;
+  el.innerHTML = `${ico} ${msg}`;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ══════════════════════════════════════════════════════════
+// DEMO: adiciona contas de exemplo se não tiver nenhuma
+// (remova em produção)
+// ══════════════════════════════════════════════════════════
+if (connectedAccounts.length === 0 && location.search.includes('demo')) {
+  ['Loja Fashion BR','App Fitness Plus','E-com Tech'].forEach((name, i) => {
+    addAccount({ advertiser_id: `70000000${i+1}`, name, source: i % 2 === 0 ? 'adspower' : 'direct' });
+  });
+}
+</script>
+</body>
+</html>
