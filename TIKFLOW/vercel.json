@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "name": "tikflow",
+  "builds": [
+    { "src": "public/**", "use": "@vercel/static" },
+    { "src": "api/**/*.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/connect", "dest": "/public/connect.html" },
+    { "src": "/dashboard", "dest": "/public/dashboard.html" },
+    { "src": "/", "dest": "/public/index.html" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ],
+  "env": {
+    "TIKTOK_APP_ID":     "@tiktok_app_id",
+    "TIKTOK_APP_SECRET": "@tiktok_app_secret",
+    "SUPABASE_URL":      "@supabase_url",
+    "SUPABASE_ANON":     "@supabase_anon",
+    "SUPABASE_SERVICE":  "@supabase_service",
+    "APP_URL":           "@app_url"
+  }
+}
