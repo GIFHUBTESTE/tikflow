@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conectar TikTok Ads | TikFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+  <style>
+    .connect-options { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; text-align: left; }
+    .option-card { background: var(--surface-color-light); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; transition: all 0.2s; display: flex; flex-direction: column; }
+    .option-card:hover { border-color: var(--primary-color); box-shadow: 0 0 15px rgba(168, 85, 247, 0.1); }
+    .option-card h3 { font-size: 1.125rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .option-card p { font-size: 0.875rem; margin-bottom: 1.5rem; flex: 1; }
+    @media(max-width: 768px) { .connect-options { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <a href="index.html" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12A10 10 0 0 0 12 2v0a10 10 0 0 0-10 10v0a10 10 0 0 0 10 10v0a10 10 0 0 0 10-10v0Z"/>
+          <path d="m10 8 6 4-6 4Z"/>
+        </svg>
+        TikFlow
+      </a>
+    </div>
+    <div class="nav-links">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="center-screen container animate-fade-in">
+    <div class="card" style="max-width: 800px; width: 100%;">
+      
+      <div id="status-message" class="mb-8 hidden"></div>
+
+      <div style="margin-bottom: 2rem;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+        <h2>Conectar TikTok Ads</h2>
+        <p>Escolha como deseja conectar sua conta TikTok Ads</p>
+      </div>
+
+      <div class="connect-options">
+        
+        <div class="option-card">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Continuar neste navegador
+          </h3>
+          <p>Conecte sua conta TikTok Ads diretamente neste navegador.</p>
+          <button class="btn btn-primary" style="width: 100%;" onclick="connectDirect()">Conectar Agora</button>
+        </div>
+
+        <div class="option-card">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            Navegador Multilogin
+          </h3>
+          <p>Gere um link para conectar em outro navegador (ex: AdsPower, Dolphin). Este link ficará disponível por 30 minutos.</p>
+          
+          <div id="generate-section">
+            <button class="btn btn-secondary" style="width: 100%;" onclick="generateLink()" id="btn-generate">Gerar Link</button>
+          </div>
+
+          <div id="link-section" class="hidden">
+            <div class="copy-box">
+              <input type="text" id="multilogin-link" readonly>
+              <button onclick="copyLink()">Copiar</button>
+            </div>
+            <p style="font-size: 0.75rem; margin-top: 0.5rem; margin-bottom: 0;" class="text-center text-success">Link gerado com sucesso!</p>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="connect.js"></script>
+</body>
+</html>
